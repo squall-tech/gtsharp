@@ -1,0 +1,16 @@
+[
+{
+  "modid": "gtsharp",
+  "name": "Gregtech Sharp",
+  "description": "",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Squall"],
+  "credits": "Squall",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
