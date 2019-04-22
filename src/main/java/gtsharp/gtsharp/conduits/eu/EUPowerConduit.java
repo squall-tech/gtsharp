@@ -1,27 +1,38 @@
 package gtsharp.gtsharp.conduits.eu;
 
 import com.enderio.core.api.client.gui.ITabPanel;
+import com.enderio.core.client.render.BoundingBox;
 import com.enderio.core.common.util.DyeColor;
+import com.enderio.core.common.util.NullHelper;
 import com.enderio.core.common.vecmath.Vector4f;
 import crazypants.enderio.base.EnderIO;
 import crazypants.enderio.base.conduit.*;
+import crazypants.enderio.base.conduit.geom.CollidableCache;
 import crazypants.enderio.base.conduit.geom.CollidableComponent;
+import crazypants.enderio.base.conduit.geom.ConduitGeometryUtil;
 import crazypants.enderio.base.machine.modes.RedstoneControlMode;
 import crazypants.enderio.base.render.registry.TextureRegistry;
 import crazypants.enderio.conduits.conduit.AbstractConduit;
+import crazypants.enderio.conduits.conduit.TileConduitBundle;
+import crazypants.enderio.conduits.conduit.power.IPowerConduit;
+import crazypants.enderio.conduits.config.ConduitConfig;
 import crazypants.enderio.conduits.gui.PowerSettings;
+import crazypants.enderio.conduits.render.BlockStateWrapperConduitBundle;
 import crazypants.enderio.conduits.render.ConduitTexture;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class EUPowerConduit  extends AbstractConduit implements IEUPowerConduit {
 
@@ -35,7 +46,7 @@ public class EUPowerConduit  extends AbstractConduit implements IEUPowerConduit 
 
     static final String[] POSTFIX = new String[]{"_tungstensteel", "_hssg", "_naquadah", "_naquadah_alloy"};
 
-    public static void registerTextures() {
+    static {
         int i = 0;
         for (String pf : POSTFIX) {
             ICONS.put(ICON_KEY + pf, new ConduitTexture(TextureRegistry.registerTexture(EnderIO.DOMAIN+ ":" + ICON_KEY,false), ConduitTexture.arm(i)));
@@ -47,6 +58,7 @@ public class EUPowerConduit  extends AbstractConduit implements IEUPowerConduit 
     private IEUPowerConduitData subtype = new EUPowerConduitData(0);
 
     private EUPowerConduitNetwork network;
+
     protected final EnumMap<EnumFacing, RedstoneControlMode> rsModes = new EnumMap<EnumFacing, RedstoneControlMode>(EnumFacing.class);
     protected final EnumMap<EnumFacing, DyeColor> rsColors = new EnumMap<EnumFacing, DyeColor>(EnumFacing.class);
 
@@ -62,6 +74,20 @@ public class EUPowerConduit  extends AbstractConduit implements IEUPowerConduit 
     public void writeToNBT(@Nonnull NBTTagCompound nbtRoot) {
         super.writeToNBT(nbtRoot);
         nbtRoot.setShort("subtype", (short) this.subtype.getID());
+
+        for (Map.Entry<EnumFacing, RedstoneControlMode> entry : rsModes.entrySet()) {
+            if (entry.getValue() != null) {
+                short ord = (short) entry.getValue().ordinal();
+                nbtRoot.setShort("pRsMode." + entry.getKey().name(), ord);
+            }
+        }
+
+        for (Map.Entry<EnumFacing, DyeColor> entry : rsColors.entrySet()) {
+            if (entry.getValue() != null) {
+                short ord = (short) entry.getValue().ordinal();
+                nbtRoot.setShort("pRsCol." + entry.getKey().name(), ord);
+            }
+        }
     }
 
 
@@ -69,6 +95,38 @@ public class EUPowerConduit  extends AbstractConduit implements IEUPowerConduit 
     public void readFromNBT(@Nonnull NBTTagCompound nbtRoot) {
         super.readFromNBT(nbtRoot);
         this.subtype = IEUPowerConduitData.Registry.fromID(nbtRoot.getShort("subtype"));
+
+        for (EnumFacing dir : EnumFacing.VALUES) {
+            String key = "pRsMode." + dir.name();
+            if (nbtRoot.hasKey(key)) {
+                short ord = nbtRoot.getShort(key);
+                if (ord >= 0 && ord < RedstoneControlMode.values().length) {
+                    rsModes.put(dir, RedstoneControlMode.values()[ord]);
+                }
+            }
+            key = "pRsCol." + dir.name();
+            if (nbtRoot.hasKey(key)) {
+                short ord = nbtRoot.getShort(key);
+                if (ord >= 0 && ord < DyeColor.values().length) {
+                    rsColors.put(dir, DyeColor.values()[ord]);
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void readTypeSettings(@Nonnull EnumFacing dir, @Nonnull NBTTagCompound dataRoot) {
+        setConnectionMode(dir, NullHelper.first(ConnectionMode.values()[dataRoot.getShort("connectionMode")], ConnectionMode.NOT_SET));
+        setExtractionSignalColor(dir, NullHelper.first(DyeColor.values()[dataRoot.getShort("extractionSignalColor")], DyeColor.RED));
+        setExtractionRedstoneMode(RedstoneControlMode.fromOrdinal(dataRoot.getShort("extractionRedstoneMode")), dir);
+    }
+
+
+    @Override
+    protected void writeTypeSettingsToNbt(@Nonnull EnumFacing dir, @Nonnull NBTTagCompound dataRoot) {
+        dataRoot.setShort("connectionMode", (short) getConnectionMode(dir).ordinal());
+        dataRoot.setShort("extractionSignalColor", (short) getExtractionSignalColor(dir).ordinal());
+        dataRoot.setShort("extractionRedstoneMode", (short) getExtractionRedstoneMode(dir).ordinal());
     }
 
     @Nonnull
@@ -178,24 +236,30 @@ public class EUPowerConduit  extends AbstractConduit implements IEUPowerConduit 
         return subtype.createItemStackForSubtype();
     }
 
+
+
+    private int storedRf = 0;
+
     @Override
     public int receiveEnergy(int maxReceive, boolean simulate) {
-        return 0;
+        storedRf =+ maxReceive;
+        return maxReceive;
     }
 
     @Override
     public int extractEnergy(int maxExtract, boolean simulate) {
-        return 0;
+        storedRf =- maxExtract;
+        return maxExtract;
     }
 
     @Override
     public int getEnergyStored() {
-        return 0;
+        return storedRf;
     }
 
     @Override
     public int getMaxEnergyStored() {
-        return 0;
+        return Integer.MAX_VALUE;
     }
 
     @Override
@@ -207,4 +271,122 @@ public class EUPowerConduit  extends AbstractConduit implements IEUPowerConduit 
     public boolean canReceive() {
         return true;
     }
+
+
+    @Override
+    public boolean canConnectToExternal(@Nonnull EnumFacing direction, boolean ignoreDisabled) {
+        TileEntity te = getBundle().getEntity();
+        World world = te.getWorld();
+        TileEntity tileEntity = world.getTileEntity(te.getPos().offset(direction));
+        if (tileEntity == null) {
+            return false;
+        }
+        if (tileEntity instanceof IConduitBundle) {
+            return false;
+        }
+
+        return tileEntity.hasCapability(CapabilityEnergy.ENERGY, direction.getOpposite());
+    }
+
+    @Override
+    public boolean canConnectToConduit(@Nonnull EnumFacing direction, @Nonnull IConduit conduit) {
+        boolean res = super.canConnectToConduit(direction, conduit);
+        if (!res) {
+            return false;
+        }
+        if (ConduitConfig.canDifferentTiersConnect.get()) {
+            return res;
+        }
+        if (!(conduit instanceof IEUPowerConduit)) {
+            return false;
+        }
+        IEUPowerConduit pc = (IEUPowerConduit) conduit;
+        //return pc.getMaxEnergyStored() == getMaxEnergyStored();
+        return true;
+    }
+
+    @Override
+    public void externalConnectionAdded(@Nonnull EnumFacing direction) {
+        super.externalConnectionAdded(direction);
+        if (network != null) {
+            TileEntity te = getBundle().getEntity();
+            BlockPos p = te.getPos().offset(direction);
+            network.powerReceptorAdded(this, direction, p);
+        }
+    }
+
+    @Override
+    public void externalConnectionRemoved(@Nonnull EnumFacing direction) {
+        super.externalConnectionRemoved(direction);
+        if (network != null) {
+            TileEntity te = getBundle().getEntity();
+            BlockPos p = te.getPos().offset(direction);
+            network.powerReceptorRemoved(p.getX(), p.getY(), p.getZ());
+        }
+    }
+
+    @SideOnly(Side.CLIENT)
+    @Override
+    public void hashCodeForModelCaching(BlockStateWrapperConduitBundle.ConduitCacheKey hashCodes) {
+        super.hashCodeForModelCaching(hashCodes);
+        if (subtype.getID() != 1) {
+
+        }
+        hashCodes.add(subtype.getID());
+        hashCodes.addEnum(rsModes);
+        hashCodes.addEnum(rsColors);
+    }
+
+    @Override
+    public void onAddedToBundle() {
+        for (EnumFacing dir : EnumFacing.VALUES) {
+            TileEntity te = getBundle().getEntity();
+            if (te instanceof TileConduitBundle) {
+                IEUPowerConduit cond = ((TileConduitBundle) te).getConduit(IEUPowerConduit.class);
+                if (cond != null) {
+                    cond.setConnectionMode(dir.getOpposite(), ConnectionMode.IN_OUT);
+                    ConduitUtil.connectConduits(cond, dir.getOpposite());
+                }
+            }
+        }
+    }
+
+
+    @Override
+    @Nonnull
+    public Collection<CollidableComponent> createCollidables(@Nonnull CollidableCache.CacheKey key) {
+        Collection<CollidableComponent> baseCollidables = super.createCollidables(key);
+        final EnumFacing key_dir = key.dir;
+        if (key_dir == null) {
+            return baseCollidables;
+        }
+
+        BoundingBox bb = ConduitGeometryUtil.getInstance().createBoundsForConnectionController(key_dir, key.offset);
+        CollidableComponent cc = new CollidableComponent(IPowerConduit.class, bb, key_dir, COLOR_CONTROLLER_ID);
+
+        List<CollidableComponent> result = new ArrayList<>();
+        result.addAll(baseCollidables);
+        result.add(cc);
+
+        return result;
+    }
+
+    @Override
+    public boolean hasCapability(final Capability<?> capability, final EnumFacing facing) {
+        if (capability == CapabilityEnergy.ENERGY) {
+            return true;
+        }
+        return false;
+    }
+
+
+    @Override
+    public <T> T getCapability(final Capability<T> capability, final EnumFacing facing) {
+        if (capability == CapabilityEnergy.ENERGY) {
+            return (T) this;
+        }
+        return null;
+    }
+
+
 }

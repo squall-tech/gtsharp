@@ -28,4 +28,9 @@ public class GTSharpMod {
         // some example code
         logger.info("DIRT BLOCK >> {}", Blocks.DIRT.getRegistryName());
     }
+
+
+    public static Logger getLogger() {
+        return logger;
+    }
 }

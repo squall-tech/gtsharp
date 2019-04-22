@@ -3,8 +3,8 @@ package gtsharp.gtsharp.conduits.eu;
 import com.enderio.core.client.render.IconUtil;
 import crazypants.enderio.base.conduit.IConduitTexture;
 import crazypants.enderio.base.conduit.geom.CollidableComponent;
-import crazypants.enderio.conduits.conduit.power.PowerConduit;
 import crazypants.enderio.conduits.render.ConduitTextureWrapper;
+import gtsharp.gtsharp.GTSharpMod;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -40,12 +40,16 @@ public class EUPowerConduitData implements IEUPowerConduitData {
     @Override
     @SideOnly(Side.CLIENT)
     public @Nonnull IConduitTexture getTextureForState(@Nonnull CollidableComponent component) {
+
+        GTSharpMod.getLogger().info("getTextureForState: {} ",this::getID);
+
         if (component.isCore()) {
             return EUPowerConduit.ICONS.get(EUPowerConduit.ICON_CORE_KEY + EUPowerConduit.POSTFIX[getID()]);
         }
-        if (PowerConduit.COLOR_CONTROLLER_ID.equals(component.data)) {
+        if (EUPowerConduit.COLOR_CONTROLLER_ID.equals(component.data)) {
             return new ConduitTextureWrapper(IconUtil.instance.whiteTexture);
         }
+
         return EUPowerConduit.ICONS.get(EUPowerConduit.ICON_KEY + EUPowerConduit.POSTFIX[getID()]);
     }
 }
