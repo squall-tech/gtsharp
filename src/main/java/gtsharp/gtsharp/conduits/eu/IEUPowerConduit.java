@@ -1,11 +1,7 @@
 package gtsharp.gtsharp.conduits.eu;
 
-import crazypants.enderio.base.conduit.IClientConduit;
-import crazypants.enderio.base.conduit.IExtractor;
-import crazypants.enderio.base.conduit.IServerConduit;
-import net.minecraftforge.energy.IEnergyStorage;
+import crazypants.enderio.conduits.conduit.power.IPowerConduit;
 
-public interface IEUPowerConduit extends IEnergyStorage, IExtractor, IServerConduit, IClientConduit {
+public interface IEUPowerConduit extends IPowerConduit {
 
-    String COLOR_CONTROLLER_ID = "ColorController";
 }

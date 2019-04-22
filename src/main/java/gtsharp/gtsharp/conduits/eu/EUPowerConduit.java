@@ -11,10 +11,12 @@ import crazypants.enderio.base.conduit.geom.CollidableCache;
 import crazypants.enderio.base.conduit.geom.CollidableComponent;
 import crazypants.enderio.base.conduit.geom.ConduitGeometryUtil;
 import crazypants.enderio.base.machine.modes.RedstoneControlMode;
+import crazypants.enderio.base.power.IPowerInterface;
 import crazypants.enderio.base.render.registry.TextureRegistry;
 import crazypants.enderio.conduits.conduit.AbstractConduit;
 import crazypants.enderio.conduits.conduit.TileConduitBundle;
 import crazypants.enderio.conduits.conduit.power.IPowerConduit;
+import crazypants.enderio.conduits.conduit.power.IPowerConduitData;
 import crazypants.enderio.conduits.config.ConduitConfig;
 import crazypants.enderio.conduits.gui.PowerSettings;
 import crazypants.enderio.conduits.render.BlockStateWrapperConduitBundle;
@@ -24,6 +26,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.CapabilityEnergy;
@@ -33,6 +36,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
+
+import static crazypants.enderio.base.conduit.ConnectionMode.INPUT;
 
 public class EUPowerConduit  extends AbstractConduit implements IEUPowerConduit {
 
@@ -236,20 +241,24 @@ public class EUPowerConduit  extends AbstractConduit implements IEUPowerConduit 
         return subtype.createItemStackForSubtype();
     }
 
-
-
     private int storedRf = 0;
 
     @Override
     public int receiveEnergy(int maxReceive, boolean simulate) {
-        storedRf =+ maxReceive;
-        return maxReceive;
+        int freeSpace = (40000 - storedRf);
+        int result = Math.min(maxReceive, freeSpace);
+        if (!simulate && result > 0) {
+            storedRf += result;
+        }
+        return result;
     }
 
     @Override
     public int extractEnergy(int maxExtract, boolean simulate) {
-        storedRf =- maxExtract;
-        return maxExtract;
+        if (storedRf > 0) {
+            storedRf -= Math.min(maxExtract, storedRf);
+        }
+        return 0;
     }
 
     @Override
@@ -259,7 +268,7 @@ public class EUPowerConduit  extends AbstractConduit implements IEUPowerConduit 
 
     @Override
     public int getMaxEnergyStored() {
-        return Integer.MAX_VALUE;
+        return 40000;
     }
 
     @Override
@@ -389,4 +398,46 @@ public class EUPowerConduit  extends AbstractConduit implements IEUPowerConduit 
     }
 
 
+    @Override
+    public IPowerInterface getExternalPowerReceptor(@Nonnull EnumFacing direction) {
+        return (IPowerInterface) this;
+    }
+
+    @Override
+    public void onTick() {
+
+    }
+
+    @Override
+    public boolean getConnectionsDirty() {
+        return false;
+    }
+
+    @Override
+    public void setEnergyStored(int energy) {
+        storedRf = MathHelper.clamp(energy, 0, getMaxEnergyStored());
+    }
+
+    @Override
+    public int getMaxEnergyRecieved(@Nonnull EnumFacing dir) {
+        return getMaxEnergyIO(subtype);
+    }
+
+    @Override
+    public int getMaxEnergyExtracted(EnumFacing direction) {
+//        ConnectionMode mode = getConnectionMode(dir);
+//        if (mode == INPUT || mode == ConnectionMode.DISABLED || !isRedstoneEnabled(dir)) {
+//            return 0;
+//        }
+        return getMaxEnergyIO(subtype);
+    }
+
+    @Override
+    public void setConnectionsDirty() {
+
+    }
+
+    public static int getMaxEnergyIO(IEUPowerConduitData subtype) {
+        return subtype.getMaxEnergyIO();
+    }
 }

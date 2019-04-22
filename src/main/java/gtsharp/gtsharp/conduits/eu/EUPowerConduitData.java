@@ -28,7 +28,7 @@ public class EUPowerConduitData implements IEUPowerConduitData {
 
     @Override
     public int getMaxEnergyIO() {
-        return 0;
+        return 40000;
     }
 
     @Nonnull
