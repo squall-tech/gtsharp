@@ -410,7 +410,7 @@ public class EUPowerConduit  extends AbstractConduit implements IEUPowerConduit 
 
     @Override
     public boolean getConnectionsDirty() {
-        return false;
+        return connectionsDirty;
     }
 
     @Override

@@ -51,7 +51,8 @@ public enum GTSharpConduits implements IModObjectBase {
 
     @SubscribeEvent
     public static void registerBlocksEarly(@Nonnull RegisterModObject event) {
-        event.register(GTSharpConduits.class);
+        if (GTSharpMod.euConduits)
+            event.register(GTSharpConduits.class);
     }
 
 

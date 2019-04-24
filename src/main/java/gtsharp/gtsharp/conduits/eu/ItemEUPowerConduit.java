@@ -11,8 +11,8 @@ import crazypants.enderio.base.conduit.registry.ConduitRegistry;
 import crazypants.enderio.base.gui.IconEIO;
 import crazypants.enderio.conduits.conduit.AbstractItemConduit;
 import crazypants.enderio.conduits.conduit.ItemConduitSubtype;
-import crazypants.enderio.conduits.conduit.power.PowerConduitRenderer;
 import crazypants.enderio.conduits.render.ConduitBundleRenderManager;
+import gtsharp.gtsharp.GTSharpMod;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -26,7 +26,10 @@ import javax.annotation.Nullable;
 public class ItemEUPowerConduit extends AbstractItemConduit {
 
     public static ItemEUPowerConduit create(@Nonnull IModObject modObject, @Nullable Block block) {
-        return new ItemEUPowerConduit(modObject);
+        if (GTSharpMod.euConduits)
+            return new ItemEUPowerConduit(modObject);
+        else
+            return null;
     }
 
     protected ItemEUPowerConduit(@Nonnull IModObject modObject) {
