@@ -25,6 +25,8 @@ public class CommonProxy {
     public static void registerItems(RegistryEvent.Register<Item> event) {
         IForgeRegistry<Item> registry = event.getRegistry();
 
+
+
         registry.register(createItemBlock(GTSharpMetaBlocks.GT_SHARP_BLOCK_MULTIBLOCK_CASING, VariantItemBlock::new));
     }
 
