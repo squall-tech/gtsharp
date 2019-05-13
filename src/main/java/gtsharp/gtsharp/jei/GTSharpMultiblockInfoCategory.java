@@ -9,6 +9,7 @@ import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.recipe.IRecipeCategory;
 import mezz.jei.gui.recipes.RecipeLayout;
+import net.minecraft.client.resources.I18n;
 
 public class GTSharpMultiblockInfoCategory implements IRecipeCategory<MultiblockInfoRecipeWrapper> {
 
@@ -32,7 +33,7 @@ public class GTSharpMultiblockInfoCategory implements IRecipeCategory<Multiblock
 
     @Override
     public String getTitle() {
-        return "sei la";
+        return I18n.format("gregtech.multiblock.title", new Object[0]);
     }
 
     @Override

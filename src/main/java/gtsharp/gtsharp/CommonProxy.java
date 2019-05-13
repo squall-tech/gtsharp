@@ -2,11 +2,14 @@ package gtsharp.gtsharp;
 
 import gregtech.common.blocks.VariantItemBlock;
 import gtsharp.gtsharp.block.GTSharpMetaBlocks;
+import gtsharp.gtsharp.items.GTSharpMetaItems;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
+import net.minecraft.item.crafting.IRecipe;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.registries.IForgeRegistry;
 
@@ -35,5 +38,11 @@ public class CommonProxy {
         itemBlock.setRegistryName(block.getRegistryName());
         return itemBlock;
     }
+
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public static void registerRecipes(RegistryEvent.Register<IRecipe> event) {
+        GTSharpMetaItems.registerRecipes();
+    }
+
 
 }

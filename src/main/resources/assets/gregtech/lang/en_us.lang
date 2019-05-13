@@ -1,5 +1,4 @@
 metaitem.invar_fluid_cell.name=144L Invar Fluid Cell
-
-
+metaitem.fuel_rod.name=%s Fuel Rod
 
 gtsharp.machine.fission_reactor.name=Fission Reactor
