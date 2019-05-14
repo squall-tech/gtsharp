@@ -2,7 +2,6 @@ package gtsharp.gtsharp;
 
 
 import gtsharp.gtsharp.block.GTSharpMetaBlocks;
-import gtsharp.gtsharp.capabilities.CapabilityFuelRod;
 import gtsharp.gtsharp.items.GTSharpMetaItems;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -53,12 +52,6 @@ public class GTSharpMod {
     {
 
     }
-
-    @SubscribeEvent
-    public void attachItemCapability(final AttachCapabilitiesEvent<ItemStack> event) {
-        event.addCapability(this.resourceLocation, new CapabilityFuelRod());
-    }
-
 
     public static Logger getLogger() {
         return logger;
