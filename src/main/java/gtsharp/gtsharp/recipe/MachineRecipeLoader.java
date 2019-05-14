@@ -18,5 +18,14 @@ public class MachineRecipeLoader {
                 .EUt(30)
                 .buildAndRegister();
 
+
+        GTSharpRecipeMap.HEAT_EXCHANGER_RECIPES.recipeBuilder()
+                .fluidInputs(GTSharpMaterials.highPressureBoilingWater.getFluid(300), Materials.DistilledWater.getFluid(1000))
+                .fluidOutputs(GTSharpMaterials.highPressureWater.getFluid(299), Materials.Steam.getFluid(3000))
+                .duration(20)
+                .EUt(1)
+                .buildAndRegister();
+
+
     }
 }
