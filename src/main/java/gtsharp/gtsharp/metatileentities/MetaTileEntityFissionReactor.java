@@ -14,9 +14,9 @@ import gregtech.api.metatileentity.multiblock.MultiblockWithDisplayBase;
 import gregtech.api.multiblock.BlockPattern;
 import gregtech.api.multiblock.FactoryBlockPattern;
 import gregtech.api.multiblock.PatternMatchContext;
-import gregtech.api.recipes.ModHandler;
 import gregtech.api.render.ICubeRenderer;
 import gregtech.api.render.Textures;
+import gtsharp.gtsharp.GTSharpMaterials;
 import gtsharp.gtsharp.GTSharpTextures;
 import gtsharp.gtsharp.api.items.metaitem.FuelRodBehavior;
 import gtsharp.gtsharp.block.GTSharpBlockMultiblockCasing;
@@ -24,9 +24,13 @@ import gtsharp.gtsharp.block.GTSharpMetaBlocks;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemStackHandler;
+
+import java.util.List;
 
 public class MetaTileEntityFissionReactor extends MultiblockWithDisplayBase {
 
@@ -35,6 +39,8 @@ public class MetaTileEntityFissionReactor extends MultiblockWithDisplayBase {
     protected IMultipleTankHandler inputFluidInventory;
     protected IMultipleTankHandler outputFluidInventory;
 
+    private int mbt = 0;
+
     public MetaTileEntityFissionReactor(ResourceLocation metaTileEntityId) {
         super(metaTileEntityId);
     }
@@ -42,21 +48,25 @@ public class MetaTileEntityFissionReactor extends MultiblockWithDisplayBase {
     @Override
     protected void updateFormedValid() {
         if (!getWorld().isRemote) {
-
+            mbt = 0;
             for(int slot = 0;slot < inputInventory.getSlots();slot++){
                 ItemStack stack = inputInventory.getStackInSlot(slot);
                 FuelRodBehavior fuelRodBehavior = FuelRodBehavior.getInstanceFor(stack);
                 if (fuelRodBehavior != null) {
-                    FluidStack drainedWater = inputFluidInventory.drain(ModHandler.getWater(1), true);
-                    if(drainedWater != null && drainedWater.amount > 0) {
-                        FluidStack steamStack = ModHandler.getSteam(10);
-                        if (outputFluidInventory.fill(steamStack, true) <=0){
-                            //getWorld().createExplosion(null, getPos().getX() + 0.5, getPos().getY() + 0.5, getPos().getZ() + 0.5,100,true);
+                    if (fuelRodBehavior.getPartDamage(stack) < fuelRodBehavior.getPartMaxDurability(stack)){
+                        FluidStack drainedWater = inputFluidInventory.drain(GTSharpMaterials.highPressureWater.getFluid(10), true);
+                        if(drainedWater != null && drainedWater.amount > 0) {
+                            FluidStack steamStack = GTSharpMaterials.highPressureBoilingWater.getFluid(15);
+                            mbt += 15;
+                            if (outputFluidInventory.fill(steamStack, true) <=0){
+                                //getWorld().createExplosion(null, getPos().getX() + 0.5, getPos().getY() + 0.5, getPos().getZ() + 0.5,100,true);
+                            }
+                        } else {
+                           // getWorld().createExplosion(null, getPos().getX() + 0.5, getPos().getY() + 0.5, getPos().getZ() + 0.5,100,true);
                         }
-                    } else {
-                       // getWorld().createExplosion(null, getPos().getX() + 0.5, getPos().getY() + 0.5, getPos().getZ() + 0.5,100,true);
+
+                        fuelRodBehavior.setPartDamage(stack,fuelRodBehavior.getPartDamage(stack) + 1);
                     }
-                    fuelRodBehavior.setPartDamage(stack,fuelRodBehavior.getPartDamage(stack) + 1);
                 }
             }
         }
@@ -131,4 +141,9 @@ public class MetaTileEntityFissionReactor extends MultiblockWithDisplayBase {
         return new MetaTileEntityFissionReactor(metaTileEntityId);
     }
 
+    @Override
+    protected void addDisplayText(List<ITextComponent> textList) {
+        super.addDisplayText(textList);
+        textList.add(new TextComponentString("Generating " + mbt + "mb/t"));
+    }
 }

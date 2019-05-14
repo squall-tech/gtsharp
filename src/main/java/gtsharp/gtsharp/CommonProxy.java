@@ -3,6 +3,7 @@ package gtsharp.gtsharp;
 import gregtech.common.blocks.VariantItemBlock;
 import gtsharp.gtsharp.block.GTSharpMetaBlocks;
 import gtsharp.gtsharp.items.GTSharpMetaItems;
+import gtsharp.gtsharp.recipe.MachineRecipeLoader;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -41,6 +42,7 @@ public class CommonProxy {
 
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void registerRecipes(RegistryEvent.Register<IRecipe> event) {
+        MachineRecipeLoader.init();
         GTSharpMetaItems.registerRecipes();
     }
 
