@@ -2,6 +2,8 @@ package gtsharp.gtsharp.jei;
 
 import com.google.common.collect.Lists;
 import gregtech.integration.jei.multiblock.MultiblockInfoRecipeWrapper;
+import gtsharp.gtsharp.GTSharpMaterials;
+import gtsharp.gtsharp.GTSharpMetaTileEntities;
 import mezz.jei.api.IJeiHelpers;
 import mezz.jei.api.IModRegistry;
 import mezz.jei.api.gui.IDrawable;
@@ -21,8 +23,9 @@ public class GTSharpMultiblockInfoCategory implements IRecipeCategory<Multiblock
 
     public static void registerRecipes(IModRegistry registry) {
         registry.addRecipes(Lists.newArrayList(
-                new MultiblockInfoRecipeWrapper(new FissionReactorInfo()),
-                new MultiblockInfoRecipeWrapper(new HeatExchangerInfo())
+                new MultiblockInfoRecipeWrapper(new InfoFissionReactor()),
+                new MultiblockInfoRecipeWrapper(new InfoHeatExchanger()),
+                new MultiblockInfoRecipeWrapper(new InfoLargeTurbine(GTSharpMetaTileEntities.META_TILE_ENTITY_LARGE_TURBINE))
 
         ), "gtsharp:multiblock_info");
     }

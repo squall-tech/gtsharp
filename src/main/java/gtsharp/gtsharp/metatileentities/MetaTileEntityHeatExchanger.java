@@ -95,7 +95,7 @@ public class MetaTileEntityHeatExchanger extends MultiblockWithAbilities {
         return new MetaTileEntityHeatExchanger(metaTileEntityId);
     }
 
-    private IBlockState getCasingState() {
+    public IBlockState getCasingState() {
         return MetaBlocks.METAL_CASING.getState(BlockMetalCasing.MetalCasingType.STEEL_SOLID);
     }
 
