@@ -43,9 +43,17 @@ public class FuelRodBehavior extends AbstractMaterialPartBehavior implements IIt
         }
     }
 
+    public int getFuelEfficiency(ItemStack itemStack) {
+        return 64;
+    }
+
+    public float getHeatPerTick(ItemStack itemStack){
+        return 1.1f;
+    }
+
     @Override
     public int getPartMaxDurability(ItemStack itemStack) {
-        return 10000;
+        return 36000;
     }
 
     @Override

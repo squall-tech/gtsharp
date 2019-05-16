@@ -10,6 +10,7 @@ import gregtech.api.metatileentity.multiblock.MultiblockAbility;
 import gregtech.api.metatileentity.multiblock.MultiblockWithDisplayBase;
 import gregtech.api.multiblock.PatternMatchContext;
 import gregtech.api.render.Textures;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemStackHandler;
@@ -20,6 +21,9 @@ public abstract class MultiblockWithAbilities extends MultiblockWithDisplayBase 
     protected IItemHandlerModifiable outputInventory;
     protected IMultipleTankHandler inputFluidInventory;
     protected IMultipleTankHandler outputFluidInventory;
+
+    private int successTick = 0;
+    private boolean active = false;
 
 
     public MultiblockWithAbilities(ResourceLocation metaTileEntityId) {
@@ -59,7 +63,43 @@ public abstract class MultiblockWithAbilities extends MultiblockWithDisplayBase 
     @Override
     public void renderMetaTileEntity(CCRenderState renderState, Matrix4 translation, IVertexOperation[] pipeline) {
         super.renderMetaTileEntity(renderState, translation, pipeline);
-        Textures.MULTIBLOCK_WORKABLE_OVERLAY.render(renderState, translation, pipeline, this.getFrontFacing(), false);
+        Textures.MULTIBLOCK_WORKABLE_OVERLAY.render(renderState, translation, pipeline, this.getFrontFacing(), active);
     }
 
+    protected void successProcess() {
+        successTick++;
+    }
+
+    @Override
+    public void update() {
+        super.update();
+        if (getTimer() % 10 == 0) {
+            active = successTick > 0;
+            writeCustomData(100, b -> b.writeBoolean(active));
+            getWorld().checkLight(getPos());
+            successTick = 0;
+        }
+    }
+
+    @Override
+    public void writeInitialSyncData(PacketBuffer buf) {
+        super.writeInitialSyncData(buf);
+        buf.writeBoolean(active);
+    }
+
+    @Override
+    public void receiveInitialSyncData(PacketBuffer buf) {
+        super.receiveInitialSyncData(buf);
+        this.active = buf.readBoolean();
+    }
+
+    @Override
+    public void receiveCustomData(int dataId, PacketBuffer buf) {
+        super.receiveCustomData(dataId, buf);
+        if(dataId == 100) {
+            this.active = buf.readBoolean();
+            getWorld().checkLight(getPos());
+            getHolder().scheduleChunkForRenderUpdate();
+        }
+    }
 }

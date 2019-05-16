@@ -17,12 +17,16 @@ import gtsharp.gtsharp.GTSharpMaterials;
 import gtsharp.gtsharp.api.metatileentity.MultiblockWithAbilities;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.IFluidTank;
 
 import java.util.List;
 
 public class MetaTileEntityHeatExchanger extends MultiblockWithAbilities {
+
+    int mbt = 0;
 
     public MetaTileEntityHeatExchanger(ResourceLocation metaTileEntityId) {
         super(metaTileEntityId);
@@ -31,27 +35,34 @@ public class MetaTileEntityHeatExchanger extends MultiblockWithAbilities {
     @Override
     protected void updateFormedValid() {
         if (!getWorld().isRemote) {
-            FluidStack fs1 = inputFluidInventory.drain(GTSharpMaterials.highPressureBoilingWater.getFluid(150), false);
+            mbt = 0;
+            FluidStack fs1 = inputFluidInventory.drain(GTSharpMaterials.highPressureBoilingWater.getFluid(2048), false);
             if (fs1 != null) {
-                FluidStack fs2 = inputFluidInventory.drain(Materials.DistilledWater.getFluid(fs1.amount * 10), false);
-                if (fs2 != null) {
+                int necessaryDw = Math.max((int) Math.floor(fs1.amount/100), 1);
+                FluidStack fs2 = inputFluidInventory.drain(Materials.DistilledWater.getFluid(necessaryDw), false);
+                if (fs2 != null && fs2.amount == necessaryDw) {
                     int utilizedHotWater = 0;
                     int generatedSteam = 0;
 
                     List<IFluidTank> fluidTanks = outputFluidInventory.getFluidTanks();
 
                     if (fluidTanks.size() > 0) {
-                        utilizedHotWater = fluidTanks.get(0).fill(GTSharpMaterials.highPressureWater.getFluid(fs2.amount / 10), false);
+                        utilizedHotWater = fluidTanks.get(0).fill(GTSharpMaterials.highPressureWater.getFluid(fs1.amount), false);
                     }
                     if (fluidTanks.size() > 1) {
-                        generatedSteam = fluidTanks.get(1).fill(Materials.Steam.getFluid(fs2.amount * 10), false);
+                        generatedSteam = fluidTanks.get(1).fill(Materials.Steam.getFluid(fs1.amount * 2), false);
                     }
 
                     if (utilizedHotWater > 0 && generatedSteam > 0){
-                        fluidTanks.get(0).fill(GTSharpMaterials.highPressureWater.getFluid(utilizedHotWater -1), true);
-                        fluidTanks.get(1).fill(Materials.Steam.getFluid(fs2.amount * 10), true);
+
+                        mbt = generatedSteam;
+                        fluidTanks.get(0).fill(GTSharpMaterials.highPressureWater.getFluid(utilizedHotWater), true);
+                        fluidTanks.get(1).fill(Materials.Steam.getFluid(generatedSteam), true);
+
                         inputFluidInventory.drain(GTSharpMaterials.highPressureBoilingWater.getFluid(utilizedHotWater), true);
-                        inputFluidInventory.drain(Materials.DistilledWater.getFluid(generatedSteam /10), true);
+                        inputFluidInventory.drain(Materials.DistilledWater.getFluid(necessaryDw), true);
+
+                        super.successProcess();
                     }
                 }
             }
@@ -86,5 +97,11 @@ public class MetaTileEntityHeatExchanger extends MultiblockWithAbilities {
 
     private IBlockState getCasingState() {
         return MetaBlocks.METAL_CASING.getState(BlockMetalCasing.MetalCasingType.STEEL_SOLID);
+    }
+
+    @Override
+    protected void addDisplayText(List<ITextComponent> textList) {
+        super.addDisplayText(textList);
+        textList.add(new TextComponentString("Generating " + mbt + "mb/t of steam"));
     }
 }
