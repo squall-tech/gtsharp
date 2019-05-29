@@ -20,7 +20,9 @@ public class GTSharpBlockMultiblockCasing extends VariantBlock<GTSharpBlockMulti
 
     public enum MultiblockCasingType implements IStringSerializable {
 
-        REACTOR_PRESSURE_VESSEL("reactor_pressure_vessel");
+        REACTOR_PRESSURE_VESSEL("reactor_pressure_vessel"),
+        HV_COMPUTER_CASING("hv_computer_casing"),
+        HV_CONNECTOR_CASING("hv_connector_casing");
 
         private String name;
 
