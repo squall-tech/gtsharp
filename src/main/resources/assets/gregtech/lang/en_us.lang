@@ -1,5 +1,6 @@
 metaitem.invar_fluid_cell.name=144L Invar Fluid Cell
 metaitem.fuel_rod.name=%s Fuel Rod
+metaitem.mass_energy_conversion_interface.name=Mass–Energy Conversion Interface
 
 gtsharp.machine.fission_reactor.name=Fission Reactor
 gtsharp.machine.research-computer.name=Advanced Research Computer
@@ -9,3 +10,6 @@ gtsharp.machine.pressurizer.lv=Basic Pressurizer
 tile.gtsharp_multiblock_casing.hv_computer_casing.name=Advanced Computer Casing
 tile.gtsharp_multiblock_casing.reactor_pressure_vessel.name=Reactor Pressure Vessel
 tile.gtsharp_multiblock_casing.hv_connector_casing.name=Advanced Connector Casing
+
+
+

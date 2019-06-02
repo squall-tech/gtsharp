@@ -17,6 +17,7 @@ import java.util.List;
 
 import static gtsharp.gtsharp.items.GTSharpMetaItems.FUEL_ROD;
 import static gtsharp.gtsharp.items.GTSharpMetaItems.INVAR_FLUID_CELL;
+import static gtsharp.gtsharp.items.GTSharpMetaItems.MASS_ENERGY_CONVERSION_INTERFACE;
 
 public class GTSharpMetaItem extends MaterialMetaItem {
 
@@ -40,6 +41,8 @@ public class GTSharpMetaItem extends MaterialMetaItem {
                 .addStats(new FuelRodBehavior())
                 .setMaxStackSize(16)
                 .setMaterialInfo(new ItemMaterialInfo(new MaterialStack(Materials.Invar, OrePrefix.plate.materialAmount * 2L + 2L * OrePrefix.ring.materialAmount)));
+
+        MASS_ENERGY_CONVERSION_INTERFACE = addItem(3407, "mass_energy_conversion_interface");
     }
 
     public void registerRecipes() {

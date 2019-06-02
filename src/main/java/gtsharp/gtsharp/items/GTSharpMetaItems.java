@@ -10,6 +10,7 @@ public class GTSharpMetaItems {
 
     public static MetaItem<?>.MetaValueItem INVAR_FLUID_CELL;
     public static MetaItem<?>.MetaValueItem FUEL_ROD;
+    public static MetaItem<?>.MetaValueItem MASS_ENERGY_CONVERSION_INTERFACE;
 
     public static void init() {
         GTSharpMetaItem gtSharpMetaItem = new GTSharpMetaItem();

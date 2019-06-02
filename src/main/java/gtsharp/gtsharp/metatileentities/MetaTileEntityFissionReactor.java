@@ -64,26 +64,25 @@ public class MetaTileEntityFissionReactor extends MultiblockWithAbilities {
                     }
                 }
             }
-            coreTemperature = Math.max(coreTemperature - cooling,30);
+            coreTemperature = Math.max(coreTemperature - cooling, 30);
             if (getTimer() % 20 == 0) {
                 cooling = 3.3f;
-                for(int x = getPos().getX() - 5; x < getPos().getX() + 5; x++) {
-                    for(int z = getPos().getZ() - 5; z < getPos().getZ() + 5; z++) {
-                        for(int y = getPos().getY() - 5; y < getPos().getY() + 5; y++) {
+                //needed to improve to get only connected wather.
+                for (int x = getPos().getX() - 5; x < getPos().getX() + 5; x++) {
+                    for (int z = getPos().getZ() - 5; z < getPos().getZ() + 5; z++) {
+                        for (int y = getPos().getY() - 5; y < getPos().getY() + 5; y++) {
                             IBlockState blockState = getWorld().getBlockState(new BlockPos(x, y, z));
                             if (blockState.getBlock() == Blocks.WATER) {
                                 int level = blockState.getValue(BlockLiquid.LEVEL).intValue();
                                 level++;
                                 if (level > 0)
-                                    cooling += 0.1/(float)level;
+                                    cooling += 0.1 / (float) level;
                             }
 
                         }
                     }
                 }
             }
-
-
         }
     }
 
@@ -123,8 +122,10 @@ public class MetaTileEntityFissionReactor extends MultiblockWithAbilities {
     @Override
     protected void addDisplayText(List<ITextComponent> textList) {
         super.addDisplayText(textList);
-        textList.add(new TextComponentString("Generating: " + mbt + "mb/t"));
-        textList.add(new TextComponentString("Cooling level: " + cooling));
-        textList.add(new TextComponentString("Core Temperature: " + coreTemperature));
+        if (isStructureFormed()) {
+            textList.add(new TextComponentString("Generating: " + mbt + "mb/t"));
+            textList.add(new TextComponentString("Cooling level: " + cooling));
+            textList.add(new TextComponentString("Core Temperature: " + coreTemperature));
+        }
     }
 }

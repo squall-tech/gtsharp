@@ -64,7 +64,7 @@ public abstract class MultiblockWithAbilities extends MultiblockWithDisplayBase 
     @Override
     public void renderMetaTileEntity(CCRenderState renderState, Matrix4 translation, IVertexOperation[] pipeline) {
         super.renderMetaTileEntity(renderState, translation, pipeline);
-        Textures.MULTIBLOCK_WORKABLE_OVERLAY.render(renderState, translation, pipeline, this.getFrontFacing(), active);
+        Textures.MULTIBLOCK_WORKABLE_OVERLAY.render(renderState, translation, pipeline, this.getFrontFacing(), this.isActive());
     }
 
     protected void successProcess() {
@@ -74,9 +74,9 @@ public abstract class MultiblockWithAbilities extends MultiblockWithDisplayBase 
     @Override
     public void update() {
         super.update();
-        if (getTimer() % 10 == 0) {
-            active = successTick > 0;
-            writeCustomData(100, b -> b.writeBoolean(active));
+        if (getTimer() % 10 == 0 && !getWorld().isRemote) {
+            this.setActive(successTick > 0);
+            writeCustomData(100, b -> b.writeBoolean(this.isActive()));
             getWorld().checkLight(getPos());
             successTick = 0;
         }
@@ -85,20 +85,20 @@ public abstract class MultiblockWithAbilities extends MultiblockWithDisplayBase 
     @Override
     public void writeInitialSyncData(PacketBuffer buf) {
         super.writeInitialSyncData(buf);
-        buf.writeBoolean(active);
+        buf.writeBoolean(this.isActive());
     }
 
     @Override
     public void receiveInitialSyncData(PacketBuffer buf) {
         super.receiveInitialSyncData(buf);
-        this.active = buf.readBoolean();
+        this.setActive(buf.readBoolean());
     }
 
     @Override
     public void receiveCustomData(int dataId, PacketBuffer buf) {
         super.receiveCustomData(dataId, buf);
         if(dataId == 100) {
-            this.active = buf.readBoolean();
+            this.setActive(buf.readBoolean());
             getWorld().checkLight(getPos());
             getHolder().scheduleChunkForRenderUpdate();
         }
@@ -107,12 +107,20 @@ public abstract class MultiblockWithAbilities extends MultiblockWithDisplayBase 
     @Override
     public void readFromNBT(NBTTagCompound data) {
         super.readFromNBT(data);
-        this.active = data.getBoolean("Active");
+        this.setActive(data.getBoolean("Active"));
     }
 
     public NBTTagCompound writeToNBT(NBTTagCompound data) {
         super.writeToNBT(data);
-        data.setBoolean("Active", active);
+        data.setBoolean("Active", this.isActive());
         return data;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public boolean isActive() {
+        return this.active;
     }
 }
