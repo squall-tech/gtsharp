@@ -24,9 +24,7 @@ public class GTSharpMultiblockInfoCategory implements IRecipeCategory<Multiblock
     public static void registerRecipes(IModRegistry registry) {
         registry.addRecipes(Lists.newArrayList(
                 new MultiblockInfoRecipeWrapper(new InfoFissionReactor()),
-                new MultiblockInfoRecipeWrapper(new InfoHeatExchanger()),
-                new MultiblockInfoRecipeWrapper(new InfoResearchComputer())
-
+                new MultiblockInfoRecipeWrapper(new InfoHeatExchanger())
         ), "gtsharp:multiblock_info");
     }
 
