@@ -24,6 +24,8 @@ import net.minecraftforge.fluids.IFluidTank;
 
 import java.util.List;
 
+//TODO - create hability for fluid1 and fluid2
+
 public class MetaTileEntityHeatExchanger extends MultiblockWithAbilities {
 
     int mbt = 0;

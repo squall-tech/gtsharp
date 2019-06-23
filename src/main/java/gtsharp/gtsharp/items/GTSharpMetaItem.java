@@ -10,23 +10,24 @@ import gregtech.api.unification.stack.ItemMaterialInfo;
 import gregtech.api.unification.stack.MaterialStack;
 import gregtech.api.unification.stack.UnificationEntry;
 import gtsharp.gtsharp.api.items.metaitem.FuelRodBehavior;
+import gtsharp.gtsharp.api.items.metaitem.FuelRodMaterial;
 import net.minecraft.item.ItemStack;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static gtsharp.gtsharp.items.GTSharpMetaItems.FUEL_ROD;
 import static gtsharp.gtsharp.items.GTSharpMetaItems.INVAR_FLUID_CELL;
-import static gtsharp.gtsharp.items.GTSharpMetaItems.MASS_ENERGY_CONVERSION_INTERFACE;
 
 public class GTSharpMetaItem extends MaterialMetaItem {
 
-    static List<IngotMaterial> rodFuels = new ArrayList<>();
-
     static {
-        rodFuels.add(Materials.Uranium);
-        rodFuels.add(Materials.Plutonium);
-        rodFuels.add(Materials.NaquadahEnriched);
+        FuelRodMaterial.registerFuelRod(new FuelRodMaterial(Materials.Uranium, 512, 36000, 1, true));
+        FuelRodMaterial.registerFuelRod(new FuelRodMaterial(Materials.Uranium235, 2048, 36000, 2, true));
+        FuelRodMaterial.registerFuelRod(new FuelRodMaterial(Materials.Plutonium, 4096, 36000, 10, true));
+        FuelRodMaterial.registerFuelRod(new FuelRodMaterial(Materials.NaquadahEnriched, 8192, 36000, 10, true));
+        FuelRodMaterial.registerFuelRod(new FuelRodMaterial(Materials.Naquadria, 32768, 36000, 20, true));
+
+        FuelRodMaterial.registerFuelRod(new FuelRodMaterial(Materials.Silver, -1024, 1, -2, false));
+        FuelRodMaterial.registerFuelRod(new FuelRodMaterial(Materials.Cadmium, -2048, 1, -4, false));
+        FuelRodMaterial.registerFuelRod(new FuelRodMaterial(Materials.Iridium, -10240, 1, -20, false));
     }
 
     @Override
@@ -42,18 +43,17 @@ public class GTSharpMetaItem extends MaterialMetaItem {
                 .setMaxStackSize(16)
                 .setMaterialInfo(new ItemMaterialInfo(new MaterialStack(Materials.Invar, OrePrefix.plate.materialAmount * 2L + 2L * OrePrefix.ring.materialAmount)));
 
-        MASS_ENERGY_CONVERSION_INTERFACE = addItem(3407, "mass_energy_conversion_interface");
     }
 
     public void registerRecipes() {
-
-        rodFuels.forEach(material -> {
+        FuelRodMaterial.getMaterials().forEach(fuelRodMaterial -> {
+            IngotMaterial material = fuelRodMaterial.getIngotMaterial();
             ItemStack stackRod = FUEL_ROD.getStackForm();
-           // IngotMaterial material = Materials.Uranium;
+            // IngotMaterial material = Materials.Uranium;
             FuelRodBehavior.getInstanceFor(stackRod).setPartMaterial(stackRod, material);
             ModHandler.addShapedRecipe(String.format("fuel_rod_%s", material.toString()),
                     stackRod,
-                    "   ", "   ", "X X",
+                    "XX ", "   ", "   ",
                     'X', new UnificationEntry(OrePrefix.ingot, material));
         });
     }

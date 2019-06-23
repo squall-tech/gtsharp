@@ -13,14 +13,9 @@
           "all": "gregtech:blocks/casings/fusion_vessel"
         }
       },
-      "hv_computer_casing": {
+      "graphite_moderator": {
         "textures": {
-          "all": "gregtech:blocks/casings/hv_computer_casing"
-        }
-      },
-      "hv_connector_casing": {
-        "textures": {
-          "all": "gregtech:blocks/casings/hv_connector_casing"
+          "all": "gregtech:blocks/casings/graphite_moderator"
         }
       }
     }

@@ -4,8 +4,10 @@ package gtsharp.gtsharp;
 import com.google.common.collect.ImmutableList;
 import gregtech.api.unification.material.IMaterialHandler;
 import gregtech.api.unification.material.MaterialIconSet;
+import gregtech.api.unification.material.Materials;
 import gregtech.api.unification.material.type.FluidMaterial;
 import gregtech.api.unification.material.type.Material;
+import gtsharp.gtsharp.config.GTSharpConfig;
 
 @IMaterialHandler.RegisterMaterialHandler
 public class GTSharpMaterials {

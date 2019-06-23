@@ -10,6 +10,7 @@ import gregtech.common.items.behaviors.AbstractMaterialPartBehavior;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 
 public class FuelRodBehavior extends AbstractMaterialPartBehavior implements IItemMaxStackSizeProvider {
@@ -44,15 +45,35 @@ public class FuelRodBehavior extends AbstractMaterialPartBehavior implements IIt
     }
 
     public int getFuelEfficiency(ItemStack itemStack) {
-        return 64;
+        FuelRodMaterial rodMaterial = FuelRodMaterial.findMaterial(getPartMaterial(itemStack));
+        if (rodMaterial != null) {
+            return rodMaterial.getFuelEfficiency();
+        }
+        return 512;
     }
 
     public float getHeatPerTick(ItemStack itemStack){
-        return 1.1f;
+        FuelRodMaterial rodMaterial = FuelRodMaterial.findMaterial(getPartMaterial(itemStack));
+        if (rodMaterial != null) {
+            return rodMaterial.getHeatPerTick();
+        }
+        return 1.0f;
+    }
+
+    public boolean isConsumable(ItemStack itemStack) {
+        FuelRodMaterial rodMaterial = FuelRodMaterial.findMaterial(getPartMaterial(itemStack));
+        if (rodMaterial != null) {
+            return rodMaterial.isConsumable();
+        }
+        return true;
     }
 
     @Override
     public int getPartMaxDurability(ItemStack itemStack) {
+        FuelRodMaterial rodMaterial = FuelRodMaterial.findMaterial(getPartMaterial(itemStack));
+        if (rodMaterial != null) {
+            return rodMaterial.getMaxDurability();
+        }
         return 36000;
     }
 
@@ -70,6 +91,12 @@ public class FuelRodBehavior extends AbstractMaterialPartBehavior implements IIt
 
     @Override
     public void onUpdate(ItemStack itemStack, World world, Entity player, int timer, boolean isInHand) {
-
+        //TODO change behavior
+//        FuelRodBehavior behavior = getInstanceFor(itemStack);
+//        if (behavior != null) {
+//            if (isInHand) {
+//                player.attackEntityFrom(DamageSource.GENERIC, 1);
+//            }
+//        }
     }
 }
