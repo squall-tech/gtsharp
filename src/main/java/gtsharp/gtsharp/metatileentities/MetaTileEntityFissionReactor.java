@@ -97,31 +97,53 @@ public class MetaTileEntityFissionReactor extends MultiblockWithAbilities {
             coreTemperature = Math.max(coreTemperature - cooling, 30);
             if (getTimer() % 20 == 0) {
                 cooling = 3.3f;
-
-                IBlockState state = getWorld().getBlockState(getPos().add(0, 0, 0));
-                state.getBlock();
-
-                //needed to improve to get only connected wather.
-                for (int x = getPos().getX() - 5; x < getPos().getX() + 5; x++) {
-                    for (int z = getPos().getZ() - 5; z < getPos().getZ() + 5; z++) {
-                        for (int y = getPos().getY() - 5; y < getPos().getY() + 5; y++) {
-                            IBlockState blockState = getWorld().getBlockState(new BlockPos(x, y, z));
-                            //instance of BlockLiquid
-                            if (blockState.getBlock() == Blocks.WATER) {
-                                int level = blockState.getValue(BlockLiquid.LEVEL).intValue();
-                                level++;
-                                if (level > 0)
-                                    cooling += 0.1 / (float) level;
+                BlockPos centerPosMachine = getCenterPosMachine();
+                if (centerPosMachine != null) {
+                    for (int x = centerPosMachine.getX() - 7; x < centerPosMachine.getX() + 8; x++) {
+                        for (int z = centerPosMachine.getZ() - 7; z < centerPosMachine.getZ() + 8; z++) {
+                            for (int y = centerPosMachine.getY(); y < centerPosMachine.getY() + 7; y++) {
+                                IBlockState blockState = getWorld().getBlockState(new BlockPos(x, y, z));
+                                if (blockState.getBlock() instanceof BlockLiquid) {
+                                    int level = blockState.getValue(BlockLiquid.LEVEL).intValue();
+                                    level++;
+                                    if (level > 0)
+                                        cooling += 0.1 / (float) level;
+                                } else if (blockState.getBlock() == Blocks.ICE) {
+                                    cooling += 0.1;
+                                }
                             }
-
                         }
                     }
+
                 }
             }
             if (coreTemperature > 10000 && GTSharpConfig.doExplosions) {
                 getWorld().createExplosion(null, getPos().getX() + 0.5, getPos().getY() + 0.5, getPos().getZ() + 0.5,200,true);
             }
         }
+    }
+
+    private BlockPos getCenterPosMachine() {
+        IBlockState state = getWorld().getBlockState(getPos().add(-1, -1, 0));
+        if (!(state.getBlock() instanceof GTSharpBlockMultiblockCasing)) {
+            return getPos().add(2, -1, 0);
+        }
+
+        state = getWorld().getBlockState(getPos().add(1, -1, 0));
+        if (!(state.getBlock() instanceof GTSharpBlockMultiblockCasing)) {
+            return getPos().add(-2, -1, -2);
+        }
+
+        state = getWorld().getBlockState(getPos().add(0, -1, -1));
+        if (!(state.getBlock() instanceof GTSharpBlockMultiblockCasing)) {
+            return getPos().add(0, -1, 2);
+        }
+
+        state = getWorld().getBlockState(getPos().add(0, -1, 1));
+        if (!(state.getBlock() instanceof GTSharpBlockMultiblockCasing)) {
+            return getPos().add(0, -1, -2);
+        }
+        return null;
     }
 
 
