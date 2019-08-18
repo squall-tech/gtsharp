@@ -8,7 +8,7 @@ public class GTSharpMetaItems {
 
     private static List<MetaItem<?>> ITEMS = MetaItem.getMetaItems();
 
-    public static MetaItem<?>.MetaValueItem INVAR_FLUID_CELL;
+    public static MetaItem<?>.MetaValueItem FLUID_CELL;
     public static MetaItem<?>.MetaValueItem FUEL_ROD;
 
     public static void init() {

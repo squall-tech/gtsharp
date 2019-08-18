@@ -45,34 +45,34 @@ public class FuelRodBehavior extends AbstractMaterialPartBehavior implements IIt
     }
 
     public int getFuelEfficiency(ItemStack itemStack) {
-        FuelRodMaterial rodMaterial = FuelRodMaterial.findMaterial(getPartMaterial(itemStack));
-        if (rodMaterial != null) {
-            return rodMaterial.getFuelEfficiency();
+        IngotMaterial material = getPartMaterial(itemStack);
+        if (material != null) {
+            return material.fuelRodProperties.getFuelEfficiency();
         }
         return 512;
     }
 
     public float getHeatPerTick(ItemStack itemStack){
-        FuelRodMaterial rodMaterial = FuelRodMaterial.findMaterial(getPartMaterial(itemStack));
-        if (rodMaterial != null) {
-            return rodMaterial.getHeatPerTick();
+        IngotMaterial material = getPartMaterial(itemStack);
+        if (material != null) {
+            return material.fuelRodProperties.getHeatPerTick();
         }
         return 1.0f;
     }
 
     public boolean isConsumable(ItemStack itemStack) {
-        FuelRodMaterial rodMaterial = FuelRodMaterial.findMaterial(getPartMaterial(itemStack));
-        if (rodMaterial != null) {
-            return rodMaterial.isConsumable();
+        IngotMaterial material = getPartMaterial(itemStack);
+        if (material != null) {
+            return material.fuelRodProperties.isConsumable();
         }
         return true;
     }
 
     @Override
     public int getPartMaxDurability(ItemStack itemStack) {
-        FuelRodMaterial rodMaterial = FuelRodMaterial.findMaterial(getPartMaterial(itemStack));
-        if (rodMaterial != null) {
-            return rodMaterial.getMaxDurability();
+        IngotMaterial material = getPartMaterial(itemStack);
+        if (material != null) {
+            return material.fuelRodProperties.getMaxDurability();
         }
         return 36000;
     }
